@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Factorised Form Graph Explorer</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --good: #065f46;
+      --warn: #92400e;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-group { margin-bottom: 18px; }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .value-badge {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .formula {
+      font-size: 1.15rem;
+      line-height: 1.65;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .fact {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .fact-title {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .fact-value {
+      font-size: 1.02rem;
+      font-weight: 700;
+    }
+
+    .note {
+      margin-top: 14px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    .highlight {
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    .warn {
+      color: var(--warn);
+      font-weight: 700;
+    }
+
+    canvas {
+      width: 100%;
+      height: 620px;
+      display: block;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 950px) {
+      .grid { grid-template-columns: 1fr; }
+      .facts { grid-template-columns: 1fr; }
+      canvas { height: 430px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Factorised Form Graph Explorer</h1>
+    <div class="subtitle">
+      Explore how <strong>y = (x + a)(x + b)</strong> is linked to the graph of a quadratic function.
+      The x-intercepts come directly from the factors: <strong>x = -a</strong> and <strong>x = -b</strong>.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="control-group">
+          <div class="label-row">
+            <label for="aSlider">Value of a</label>
+            <div class="value-badge" id="aValue">2</div>
+          </div>
+          <input id="aSlider" type="range" min="-8" max="8" step="0.5" value="2">
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="bSlider">Value of b</label>
+            <div class="value-badge" id="bValue">-4</div>
+          </div>
+          <input id="bSlider" type="range" min="-8" max="8" step="0.5" value="-4">
+        </div>
+
+        <div class="btn-row">
+          <button class="primary" id="resetBtn">Reset</button>
+          <button class="secondary" id="distinctBtn">Distinct roots</button>
+          <button class="secondary" id="equalBtn">Equal roots</button>
+        </div>
+
+        <div class="formula" id="formulaBox"></div>
+
+        <div class="facts">
+          <div class="fact">
+            <div class="fact-title">x-intercepts</div>
+            <div class="fact-value" id="rootsText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">Axis of symmetry</div>
+            <div class="fact-value" id="axisText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">Turning point</div>
+            <div class="fact-value" id="vertexText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">y-intercept</div>
+            <div class="fact-value" id="yInterceptText"></div>
+          </div>
+        </div>
+
+        <div class="note" id="explainText"></div>
+      </div>
+
+      <div class="card">
+        <canvas id="graphCanvas" width="780" height="620"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const aSlider = document.getElementById('aSlider');
+    const bSlider = document.getElementById('bSlider');
+    const aValue = document.getElementById('aValue');
+    const bValue = document.getElementById('bValue');
+    const formulaBox = document.getElementById('formulaBox');
+    const rootsText = document.getElementById('rootsText');
+    const axisText = document.getElementById('axisText');
+    const vertexText = document.getElementById('vertexText');
+    const yInterceptText = document.getElementById('yInterceptText');
+    const explainText = document.getElementById('explainText');
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function fmt(n) {
+      return Number(n).toFixed(1).replace(/\.0$/, '');
+    }
+
+    function factorText(v) {
+      if (v === 0) return 'x';
+      if (v > 0) return `(x + ${fmt(v)})`;
+      return `(x - ${fmt(Math.abs(v))})`;
+    }
+
+    function signed(n) {
+      return n >= 0 ? `+ ${fmt(n)}` : `- ${fmt(Math.abs(n))}`;
+    }
+
+    function getValues() {
+      return {
+        a: parseFloat(aSlider.value),
+        b: parseFloat(bSlider.value)
+      };
+    }
+
+    function f(x, a, b) {
+      return (x + a) * (x + b);
+    }
+
+    function drawGraph(a, b, vertexX, vertexY) {
+      const w = canvas.width;
+      const hPx = canvas.height;
+      ctx.clearRect(0, 0, w, hPx);
+
+      const xMin = -10, xMax = 10, yMin = -15, yMax = 15;
+      const xScale = w / (xMax - xMin);
+      const yScale = hPx / (yMax - yMin);
+
+      function toX(x) { return (x - xMin) * xScale; }
+      function toY(y) { return hPx - (y - yMin) * yScale; }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, hPx);
+
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 1;
+      for (let x = xMin; x <= xMax; x++) {
+        ctx.beginPath();
+        ctx.moveTo(toX(x), 0);
+        ctx.lineTo(toX(x), hPx);
+        ctx.stroke();
+      }
+      for (let y = yMin; y <= yMax; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, toY(y));
+        ctx.lineTo(w, toY(y));
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toX(xMin), toY(0));
+      ctx.lineTo(toX(xMax), toY(0));
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(yMin));
+      ctx.lineTo(toX(0), toY(yMax));
+      ctx.stroke();
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '12px Arial';
+      for (let x = xMin; x <= xMax; x++) {
+        if (x !== 0) ctx.fillText(x, toX(x) - 4, toY(0) + 16);
+      }
+      for (let y = yMin; y <= yMax; y++) {
+        if (y !== 0) ctx.fillText(y, toX(0) + 6, toY(y) + 4);
+      }
+
+      const root1 = -a;
+      const root2 = -b;
+
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(toX(vertexX), 0);
+      ctx.lineTo(toX(vertexX), hPx);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      let first = true;
+      for (let x = xMin; x <= xMax; x += 0.02) {
+        const y = f(x, a, b);
+        const px = toX(x);
+        const py = toY(y);
+        if (first) {
+          ctx.moveTo(px, py);
+          first = false;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#dc2626';
+      [[root1, 0], [root2, 0], [vertexX, vertexY]].forEach(([x, y]) => {
+        ctx.beginPath();
+        ctx.arc(toX(x), toY(y), 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`(${fmt(root1)}, 0)`, toX(root1) + 8, toY(0) - 10);
+      if (Math.abs(root2 - root1) > 0.2) {
+        ctx.fillText(`(${fmt(root2)}, 0)`, toX(root2) + 8, toY(0) - 10);
+      }
+      ctx.fillText(`Turning point (${fmt(vertexX)}, ${fmt(vertexY)})`, toX(vertexX) + 10, toY(vertexY) - 10);
+    }
+
+    function update() {
+      const { a, b } = getValues();
+      const root1 = -a;
+      const root2 = -b;
+      const axis = (root1 + root2) / 2;
+      const vertexY = f(axis, a, b);
+      const yIntercept = a * b;
+      const expandedB = a + b;
+
+      aValue.textContent = fmt(a);
+      bValue.textContent = fmt(b);
+
+      formulaBox.innerHTML = `
+        <strong>Factorised form:</strong><br>
+        y = ${factorText(a)}${factorText(b)}<br><br>
+        <strong>Expanded form:</strong><br>
+        y = x<sup>2</sup> ${signed(expandedB)}x ${signed(yIntercept)}
+      `;
+
+      if (Math.abs(root1 - root2) < 1e-9) {
+        rootsText.textContent = `x = ${fmt(root1)} (repeated root)`;
+      } else {
+        rootsText.textContent = `x = ${fmt(root1)}, x = ${fmt(root2)}`;
+      }
+
+      axisText.textContent = `x = ${fmt(axis)}`;
+      vertexText.textContent = `(${fmt(axis)}, ${fmt(vertexY)})`;
+      yInterceptText.textContent = `(0, ${fmt(yIntercept)})`;
+
+      const sameRoots = Math.abs(root1 - root2) < 1e-9;
+      explainText.innerHTML = `
+        <span class="highlight">Key idea:</span> In <strong>y = (x + a)(x + b)</strong>, the graph crosses the x-axis when <strong>y = 0</strong>.<br><br>
+        So either <strong>x + a = 0</strong> or <strong>x + b = 0</strong>. This gives the x-intercepts <strong>x = ${fmt(root1)}</strong> and <strong>x = ${fmt(root2)}</strong>.<br><br>
+        The axis of symmetry lies halfway between the two roots, so <strong>x = ${fmt(axis)}</strong>.<br><br>
+        ${sameRoots
+          ? `<span class="warn">Special case:</span> both factors are the same, so the graph touches the x-axis at one point only and turns back.`
+          : `Because the coefficient of x<sup>2</sup> is positive, the graph opens upward, so the turning point is a minimum point.`}
+      `;
+
+      drawGraph(a, b, axis, vertexY);
+    }
+
+    [aSlider, bSlider].forEach(el => el.addEventListener('input', update));
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      aSlider.value = 2;
+      bSlider.value = -4;
+      update();
+    });
+
+    document.getElementById('distinctBtn').addEventListener('click', () => {
+      aSlider.value = 3;
+      bSlider.value = -2;
+      update();
+    });
+
+    document.getElementById('equalBtn').addEventListener('click', () => {
+      aSlider.value = -2;
+      bSlider.value = -2;
+      update();
+    });
+
+    update();
+  </script>
+</body>
+</html>

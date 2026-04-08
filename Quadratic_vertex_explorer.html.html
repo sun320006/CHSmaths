@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quadratic Functions Explorer</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --accent: #2563eb;
+      --good: #065f46;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .control-group {
+      margin-bottom: 18px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .value-badge {
+      background: #eff6ff;
+      color: #1d4ed8;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .formula {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .fact {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .fact-title {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .fact-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .canvas-card {
+      padding: 16px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 600px;
+      display: block;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid #e5e7eb;
+    }
+
+    .explain {
+      margin-top: 16px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    .highlight {
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 420px;
+      }
+
+      .facts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Quadratic Functions Explorer</h1>
+    <div class="subtitle">
+      Explore how <strong>y = a(x + h)<sup>2</sup> + k</strong> shows the maximum or minimum point directly.
+      In this form, the turning point is always <strong>(-h, k)</strong>.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="control-group">
+          <div class="label-row">
+            <label for="aSlider">Value of a</label>
+            <div class="value-badge" id="aValue">1</div>
+          </div>
+          <input id="aSlider" type="range" min="-5" max="5" step="0.5" value="1">
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="hSlider">Value of h</label>
+            <div class="value-badge" id="hValue">0</div>
+          </div>
+          <input id="hSlider" type="range" min="-8" max="8" step="0.5" value="0">
+        </div>
+
+        <div class="control-group">
+          <div class="label-row">
+            <label for="kSlider">Value of k</label>
+            <div class="value-badge" id="kValue">0</div>
+          </div>
+          <input id="kSlider" type="range" min="-8" max="8" step="0.5" value="0">
+        </div>
+
+        <div class="btn-row">
+          <button class="primary" id="resetBtn">Reset</button>
+          <button class="secondary" id="exampleMinBtn">Example: Minimum</button>
+          <button class="secondary" id="exampleMaxBtn">Example: Maximum</button>
+        </div>
+
+        <div class="formula" id="formulaBox"></div>
+
+        <div class="facts">
+          <div class="fact">
+            <div class="fact-title">Turning Point</div>
+            <div class="fact-value" id="turningPointText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">Axis of Symmetry</div>
+            <div class="fact-value" id="axisText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">Nature of Turning Point</div>
+            <div class="fact-value" id="natureText"></div>
+          </div>
+          <div class="fact">
+            <div class="fact-title">Reason</div>
+            <div class="fact-value" id="reasonText"></div>
+          </div>
+        </div>
+
+        <div class="explain" id="explainText"></div>
+      </div>
+
+      <div class="card canvas-card">
+        <canvas id="graphCanvas" width="760" height="600"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const aSlider = document.getElementById('aSlider');
+    const hSlider = document.getElementById('hSlider');
+    const kSlider = document.getElementById('kSlider');
+
+    const aValue = document.getElementById('aValue');
+    const hValue = document.getElementById('hValue');
+    const kValue = document.getElementById('kValue');
+
+    const formulaBox = document.getElementById('formulaBox');
+    const turningPointText = document.getElementById('turningPointText');
+    const axisText = document.getElementById('axisText');
+    const natureText = document.getElementById('natureText');
+    const reasonText = document.getElementById('reasonText');
+    const explainText = document.getElementById('explainText');
+
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function fmt(n) {
+      return Number(n).toFixed(1).replace(/\.0$/, '');
+    }
+
+    function signed(n) {
+      return n >= 0 ? `+ ${fmt(n)}` : `- ${fmt(Math.abs(n))}`;
+    }
+
+    function bracketH(h) {
+      if (h === 0) return 'x';
+      if (h > 0) return `x + ${fmt(h)}`;
+      return `x - ${fmt(Math.abs(h))}`;
+    }
+
+    function getValues() {
+      return {
+        a: parseFloat(aSlider.value),
+        h: parseFloat(hSlider.value),
+        k: parseFloat(kSlider.value)
+      };
+    }
+
+    function f(x, a, h, k) {
+      return a * (x + h) * (x + h) + k;
+    }
+
+    function drawGraph(a, h, k) {
+      const w = canvas.width;
+      const hPx = canvas.height;
+      ctx.clearRect(0, 0, w, hPx);
+
+      const xMin = -10, xMax = 10, yMin = -12, yMax = 12;
+      const xScale = w / (xMax - xMin);
+      const yScale = hPx / (yMax - yMin);
+
+      function toX(x) { return (x - xMin) * xScale; }
+      function toY(y) { return hPx - (y - yMin) * yScale; }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, hPx);
+
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 1;
+      for (let x = xMin; x <= xMax; x++) {
+        ctx.beginPath();
+        ctx.moveTo(toX(x), 0);
+        ctx.lineTo(toX(x), hPx);
+        ctx.stroke();
+      }
+      for (let y = yMin; y <= yMax; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, toY(y));
+        ctx.lineTo(w, toY(y));
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toX(xMin), toY(0));
+      ctx.lineTo(toX(xMax), toY(0));
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(toX(0), toY(yMin));
+      ctx.lineTo(toX(0), toY(yMax));
+      ctx.stroke();
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '12px Arial';
+      for (let x = xMin; x <= xMax; x++) {
+        if (x !== 0) ctx.fillText(x, toX(x) - 4, toY(0) + 16);
+      }
+      for (let y = yMin; y <= yMax; y++) {
+        if (y !== 0) ctx.fillText(y, toX(0) + 6, toY(y) + 4);
+      }
+
+      const vertexX = -h;
+      const vertexY = k;
+
+      ctx.strokeStyle = '#059669';
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toX(vertexX), 0);
+      ctx.lineTo(toX(vertexX), hPx);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      let first = true;
+      for (let x = xMin; x <= xMax; x += 0.02) {
+        const y = f(x, a, h, k);
+        const px = toX(x);
+        const py = toY(y);
+        if (first) {
+          ctx.moveTo(px, py);
+          first = false;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.arc(toX(vertexX), toY(vertexY), 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#111827';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`Turning point (${fmt(vertexX)}, ${fmt(vertexY)})`, toX(vertexX) + 10, toY(vertexY) - 10);
+      ctx.fillStyle = '#065f46';
+      ctx.fillText(`x = ${fmt(vertexX)}`, toX(vertexX) + 10, 24);
+    }
+
+    function update() {
+      let { a, h, k } = getValues();
+      if (a === 0) {
+        a = 0.5;
+        aSlider.value = 0.5;
+      }
+
+      const vertexX = -h;
+      const vertexY = k;
+
+      aValue.textContent = fmt(a);
+      hValue.textContent = fmt(h);
+      kValue.textContent = fmt(k);
+
+      formulaBox.innerHTML = `
+        <strong>Form:</strong><br>
+        y = ${fmt(a)}(${bracketH(h)})<sup>2</sup> ${signed(k)}
+      `;
+
+      turningPointText.textContent = `(${fmt(vertexX)}, ${fmt(vertexY)})`;
+      axisText.textContent = `x = ${fmt(vertexX)}`;
+
+      const nature = a > 0 ? 'Minimum point' : 'Maximum point';
+      natureText.textContent = nature;
+      reasonText.textContent = a > 0 ? 'a > 0, so the graph opens upward' : 'a < 0, so the graph opens downward';
+
+      const comparison = a > 0
+        ? `Since (x + ${fmt(h)})² is always 0 or positive, the smallest value of y happens when (x + ${fmt(h)})² = 0. So the minimum value is ${fmt(k)} at x = ${fmt(vertexX)}.`
+        : `Since (x + ${fmt(h)})² is always 0 or positive, multiplying by a negative number makes a(x + ${fmt(h)})² always 0 or negative. So the greatest value of y happens when (x + ${fmt(h)})² = 0. The maximum value is ${fmt(k)} at x = ${fmt(vertexX)}.`;
+
+      explainText.innerHTML = `
+        <span class="highlight">Key idea:</span> In <strong>y = a(x + h)<sup>2</sup> + k</strong>, the square part is smallest when it is <strong>0</strong>.<br><br>
+        ${comparison}
+      `;
+
+      drawGraph(a, h, k);
+    }
+
+    [aSlider, hSlider, kSlider].forEach(el => el.addEventListener('input', update));
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      aSlider.value = 1;
+      hSlider.value = 0;
+      kSlider.value = 0;
+      update();
+    });
+
+    document.getElementById('exampleMinBtn').addEventListener('click', () => {
+      aSlider.value = 1.5;
+      hSlider.value = -2;
+      kSlider.value = -3;
+      update();
+    });
+
+    document.getElementById('exampleMaxBtn').addEventListener('click', () => {
+      aSlider.value = -2;
+      hSlider.value = 1;
+      kSlider.value = 4;
+      update();
+    });
+
+    update();
+  </script>
+</body>
+</html>
