@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle Properties Interactives — B3 and B4</title>
+  <style>
+    :root{
+      --ink:#172033; --muted:#5b6475; --line:#d8deea; --accent:#2563eb;
+      --accent2:#16a34a; --accent3:#dc2626; --bg:#f7f9fc; --soft:#eef4ff;
+      --gold:#c0841a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:radial-gradient(circle at top left,#ffffff 0%,var(--bg) 45%,#eef2f8 100%);
+    }
+    header{padding:22px 24px 10px; text-align:center}
+    h1{margin:0; font-size:clamp(1.5rem,3vw,2.35rem); letter-spacing:-.03em}
+    .subtitle{margin-top:8px; color:var(--muted)}
+    .tabs-wrap{width:min(1240px,96vw); margin:0 auto 14px}
+    .tabs{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+      padding:12px; background:rgba(255,255,255,.88); border:1px solid var(--line);
+      border-radius:18px; box-shadow:0 12px 30px rgba(27,39,66,.06);
+    }
+    .tab-btn{
+      border:0; border-radius:14px; padding:11px 16px; font-weight:800; cursor:pointer;
+      background:#e9eef8; color:var(--ink);
+    }
+    .tab-btn.active{background:var(--ink); color:#fff}
+    .tab-page{display:none}
+    .tab-page.active{display:block}
+
+    .layout{
+      width:min(1240px,96vw);
+      margin:0 auto 26px;
+      display:grid;
+      grid-template-columns:400px 1fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .panel,.stage{
+      background:rgba(255,255,255,.93); border:1px solid var(--line); border-radius:22px;
+      box-shadow:0 18px 45px rgba(27,39,66,.09);
+    }
+    .panel{padding:18px; display:flex; flex-direction:column; gap:14px}
+    .stage{padding:12px; min-height:680px; position:relative; overflow:hidden}
+    .activity-title{font-weight:800; font-size:1.08rem}
+    .instruction{
+      background:var(--soft); border:1px solid #d7e6ff; border-radius:16px; padding:12px 14px; line-height:1.45;
+    }
+    .measure-card{border:1px solid var(--line); border-radius:16px; padding:12px 14px; background:#fff}
+    .measure-row{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0;
+      border-bottom:1px dashed #e3e7ef; font-size:.98rem;
+    }
+    .measure-row:last-child{border-bottom:0}
+    .value{font-variant-numeric:tabular-nums; font-weight:800; color:var(--accent); white-space:nowrap}
+    .value.red{color:var(--accent3)}
+    .value.green{color:var(--accent2)}
+    .value.gold{color:var(--gold)}
+    .question{
+      padding:12px 14px; border-radius:16px; background:#fbfcff; border:1px solid var(--line); line-height:1.4;
+    }
+    .question strong{display:block; margin-bottom:4px}
+    .controls,.toggles{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    button.action{
+      border:0; border-radius:14px; padding:11px 12px; font-weight:700; cursor:pointer;
+      background:var(--ink); color:white;
+    }
+    button.action.secondary{background:#e9eef8; color:var(--ink)}
+    .check{
+      border:1px solid var(--line); border-radius:14px; padding:10px 12px; background:#fff;
+      display:flex; align-items:center; gap:10px; font-size:.95rem;
+    }
+    .check input{transform:scale(1.08)}
+    svg{width:100%; height:100%; min-height:650px; display:block; touch-action:none; user-select:none}
+    .circle{fill:#fff; stroke:#111827; stroke-width:4}
+    .diameter{stroke:var(--accent); stroke-width:3}
+    .radius{stroke:#8a94a8; stroke-width:1.8; stroke-dasharray:7 6}
+    .chord{stroke:#111827; stroke-width:2.2}
+    .chord.blue{stroke:var(--accent)}
+    .chord.green{stroke:var(--accent2)}
+    .polygon{fill:rgba(37,99,235,.06); stroke:#111827; stroke-width:2.2}
+    .angle-arc{fill:none; stroke-width:4; stroke-linecap:round}
+    .arc-blue{stroke:var(--accent)}
+    .arc-red{stroke:var(--accent3)}
+    .arc-green{stroke:var(--accent2)}
+    .arc-gold{stroke:var(--gold)}
+    .point{
+      cursor:grab; stroke:#fff; stroke-width:4; filter:drop-shadow(0 5px 8px rgba(28,43,75,.22));
+    }
+    .point:active{cursor:grabbing}
+    .point-blue{fill:var(--accent)}
+    .point-red{fill:var(--accent3)}
+    .point-green{fill:var(--accent2)}
+    .point-gold{fill:var(--gold)}
+    .center-point{fill:#111827}
+    .label{
+      font-family:Georgia,"Times New Roman",serif; font-size:26px; font-style:italic; fill:#101828; pointer-events:none;
+    }
+    .small-label{font-family:system-ui,sans-serif; font-size:15px; fill:var(--muted); pointer-events:none}
+    .angle-text{
+      font-family:system-ui,sans-serif; font-size:18px; font-weight:800; text-anchor:middle; dominant-baseline:middle; pointer-events:none;
+    }
+    .red{fill:var(--accent3)}
+    .green{fill:var(--accent2)}
+    .gold{fill:var(--gold)}
+    .blue{fill:var(--accent)}
+    .statement{
+      font-family:system-ui,sans-serif; font-size:18px; font-weight:800; text-anchor:middle; dominant-baseline:middle; pointer-events:none;
+    }
+    .floating-tip{
+      position:absolute; right:24px; bottom:22px; background:rgba(255,255,255,.92);
+      border:1px solid var(--line); border-radius:16px; padding:10px 13px; color:var(--muted);
+      font-size:.92rem; box-shadow:0 10px 25px rgba(27,39,66,.08);
+    }
+    .conclusion{
+      width:min(1240px,96vw); margin:0 auto 30px; border:1px solid var(--line); border-radius:18px;
+      background:#fff; padding:16px 18px; box-shadow:0 12px 30px rgba(27,39,66,.06); font-size:1.08rem;
+    }
+    .conclusion strong{color:var(--accent3)}
+    @media (max-width:940px){
+      .layout{grid-template-columns:1fr}
+      .stage{min-height:580px}
+      svg{min-height:550px}
+      .floating-tip{position:static; margin:10px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Circle Properties Interactives</h1>
+    <div class="subtitle">Tab 1: B3 Angle in a semicircle. Tab 2: B4 Opposite angles in a cyclic quadrilateral.</div>
+  </header>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="b3">Property B3: Angle in a semicircle</button>
+      <button class="tab-btn" data-tab="b4">Property B4: Opposite angles are supplementary</button>
+    </div>
+  </div>
+
+  <!-- B3 PAGE -->
+  <section id="b3" class="tab-page active">
+    <div class="layout">
+      <section class="panel">
+        <div class="activity-title">Activity 2</div>
+        <div class="instruction">
+          <strong>Explore:</strong> Drag <em>A</em> and <em>B</em> to rotate the diameter. Drag <em>X</em> and <em>T</em> to test both semicircles.
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-row"><span>Measure angle AOB</span><span id="b3-angleAOB" class="value">180.0°</span></div>
+          <div class="measure-row"><span>Measure angle AXB</span><span id="b3-angleAXB" class="value red">90.0°</span></div>
+          <div class="measure-row"><span>Measure angle ATB</span><span id="b3-angleATB" class="value green">90.0°</span></div>
+          <div class="measure-row"><span>Angle AXB + angle ATB</span><span id="b3-angleSum" class="value">180.0°</span></div>
+        </div>
+
+        <div class="question">
+          <strong>Question 1</strong>
+          Is the circle property “angle at centre is twice the angle at circumference” observed here?
+        </div>
+
+        <div class="question">
+          <strong>Question 2</strong>
+          Does the 90° angle work on the opposite side of the semicircle too?
+        </div>
+
+        <div class="controls">
+          <button id="b3-randomiseBtn" class="action">Randomise</button>
+          <button id="b3-resetBtn" class="action secondary">Reset</button>
+          <button id="b3-toggleLabelsBtn" class="action secondary">Hide labels</button>
+          <button id="b3-toggleHintsBtn" class="action secondary">Hide drag hints</button>
+        </div>
+
+        <div class="toggles">
+          <label class="check"><input id="b3-show90Checkbox" type="checkbox" checked />Show 90° around the angles</label>
+          <label class="check"><input id="b3-showAXBCheckbox" type="checkbox" checked />Show “∠AXB = 90°”</label>
+          <label class="check"><input id="b3-showATBCheckbox" type="checkbox" checked />Show “∠ATB = 90°”</label>
+          <label class="check"><input id="b3-showBothPointsCheckbox" type="checkbox" checked />Show both X and T</label>
+        </div>
+      </section>
+
+      <section class="stage">
+        <svg id="b3-svg" viewBox="0 0 790 660" role="img" aria-label="B3 interactive">
+          <circle class="circle" cx="395" cy="325" r="225"></circle>
+          <line id="b3-diameterLine" class="diameter"></line>
+          <line id="b3-radiusOA" class="radius"></line>
+          <line id="b3-radiusOB" class="radius"></line>
+          <line id="b3-lineAX" class="chord"></line>
+          <line id="b3-lineXB" class="chord"></line>
+          <g id="b3-lowerGroup">
+            <line id="b3-lineAT" class="chord blue"></line>
+            <line id="b3-lineTB" class="chord blue"></line>
+          </g>
+          <path id="b3-arcAOB" class="angle-arc arc-blue"></path>
+          <path id="b3-arcAXB" class="angle-arc arc-red"></path>
+          <path id="b3-arcATB" class="angle-arc arc-green"></path>
+
+          <text id="b3-angleTextX" class="angle-text red">90°</text>
+          <text id="b3-angleTextT" class="angle-text green">90°</text>
+          <text id="b3-statementX" class="statement red">∠AXB = 90°</text>
+          <text id="b3-statementT" class="statement green">∠ATB = 90°</text>
+
+          <circle id="b3-pointO" class="center-point" r="5"></circle>
+          <circle id="b3-pointA" class="point point-blue" r="12" data-b3="A"></circle>
+          <circle id="b3-pointB" class="point point-blue" r="12" data-b3="B"></circle>
+          <circle id="b3-pointX" class="point point-red" r="12" data-b3="X"></circle>
+          <circle id="b3-pointT" class="point point-green" r="12" data-b3="T"></circle>
+
+          <g id="b3-labels">
+            <text id="b3-labelA" class="label">A</text>
+            <text id="b3-labelB" class="label">B</text>
+            <text id="b3-labelX" class="label">X</text>
+            <text id="b3-labelT" class="label">T</text>
+            <text id="b3-labelO" class="label">O</text>
+          </g>
+          <g id="b3-hints">
+            <text id="b3-hintA" class="small-label">drag</text>
+            <text id="b3-hintB" class="small-label">drag</text>
+            <text id="b3-hintX" class="small-label">drag</text>
+            <text id="b3-hintT" class="small-label">drag</text>
+          </g>
+        </svg>
+        <div class="floating-tip">Tip: Keep A and B as opposite ends of a diameter. No matter where X or T moves on the circle, the angle stays 90°.</div>
+      </section>
+    </div>
+
+    <section class="conclusion"><strong>Conclusion:</strong> When AB is a diameter, any angle standing on AB at the circumference is <strong>90°</strong>.</section>
+  </section>
+
+  <!-- B4 PAGE -->
+  <section id="b4" class="tab-page">
+    <div class="layout">
+      <section class="panel">
+        <div class="activity-title">Activity 3</div>
+        <div class="instruction">
+          <strong>Explore:</strong> Drag the points <em>X, A, Y, B</em> around the circle. Watch how the opposite angles change, and notice that each opposite pair still adds up to 180°.
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-row"><span>Measure angle AXB</span><span id="b4-angleAXB" class="value red">90.0°</span></div>
+          <div class="measure-row"><span>Measure angle AYB</span><span id="b4-angleAYB" class="value green">90.0°</span></div>
+          <div class="measure-row"><span>Angle AXB + angle AYB</span><span id="b4-sumXY" class="value">180.0°</span></div>
+          <div class="measure-row"><span>Measure angle XAY</span><span id="b4-angleXAY" class="value gold">90.0°</span></div>
+          <div class="measure-row"><span>Measure angle XBY</span><span id="b4-angleXBY" class="value blue">90.0°</span></div>
+          <div class="measure-row"><span>Angle XAY + angle XBY</span><span id="b4-sumAB" class="value">180.0°</span></div>
+        </div>
+
+        <div class="question">
+          <strong>Question 1</strong>
+          What do you notice about ∠AXB and ∠AYB?
+        </div>
+        <div class="question">
+          <strong>Question 2</strong>
+          What do you notice about ∠XAY and ∠XBY?
+        </div>
+
+        <div class="controls">
+          <button id="b4-randomiseBtn" class="action">Randomise</button>
+          <button id="b4-resetBtn" class="action secondary">Reset</button>
+          <button id="b4-toggleLabelsBtn" class="action secondary">Hide labels</button>
+          <button id="b4-toggleValuesBtn" class="action secondary">Hide angle values</button>
+        </div>
+      </section>
+
+      <section class="stage">
+        <svg id="b4-svg" viewBox="0 0 790 660" role="img" aria-label="B4 interactive">
+          <circle class="circle" cx="395" cy="325" r="225"></circle>
+
+          <path id="b4-quad" class="polygon"></path>
+
+          <path id="b4-arcX" class="angle-arc arc-red"></path>
+          <path id="b4-arcY" class="angle-arc arc-green"></path>
+          <path id="b4-arcA" class="angle-arc arc-gold"></path>
+          <path id="b4-arcB" class="angle-arc arc-blue"></path>
+
+          <line id="b4-lineXA" class="chord"></line>
+          <line id="b4-lineXB" class="chord"></line>
+          <line id="b4-lineYA" class="chord"></line>
+          <line id="b4-lineYB" class="chord"></line>
+
+          <text id="b4-valX" class="angle-text red">90°</text>
+          <text id="b4-valY" class="angle-text green">90°</text>
+          <text id="b4-valA" class="angle-text gold">90°</text>
+          <text id="b4-valB" class="angle-text blue">90°</text>
+
+          <circle id="b4-pointX" class="point point-red" r="12" data-b4="X"></circle>
+          <circle id="b4-pointA" class="point point-gold" r="12" data-b4="A"></circle>
+          <circle id="b4-pointY" class="point point-green" r="12" data-b4="Y"></circle>
+          <circle id="b4-pointB" class="point point-blue" r="12" data-b4="B"></circle>
+
+          <g id="b4-labels">
+            <text id="b4-labelX" class="label">X</text>
+            <text id="b4-labelA" class="label">A</text>
+            <text id="b4-labelY" class="label">Y</text>
+            <text id="b4-labelB" class="label">B</text>
+          </g>
+        </svg>
+        <div class="floating-tip">Tip: A, X, B and Y lie on the same circle. Opposite angles of a cyclic quadrilateral are supplementary.</div>
+      </section>
+    </div>
+
+    <section class="conclusion"><strong>Conclusion:</strong> In a cyclic quadrilateral, opposite angles are supplementary.</section>
+  </section>
+
+  <script>
+    // ---------- SHARED HELPERS ----------
+    function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+    function pointOnCircle(c, r, angle){
+      return { x: c.x + r * Math.cos(angle), y: c.y + r * Math.sin(angle) };
+    }
+    function setLine(el, p1, p2){
+      el.setAttribute("x1", p1.x); el.setAttribute("y1", p1.y);
+      el.setAttribute("x2", p2.x); el.setAttribute("y2", p2.y);
+    }
+    function setCircle(el, p){ el.setAttribute("cx", p.x); el.setAttribute("cy", p.y); }
+    function setText(el, p, dx=0, dy=0){ el.setAttribute("x", p.x + dx); el.setAttribute("y", p.y + dy); }
+    function angleBetween(p, vertex, q){
+      const v1 = {x:p.x-vertex.x, y:p.y-vertex.y};
+      const v2 = {x:q.x-vertex.x, y:q.y-vertex.y};
+      const dot = v1.x*v2.x + v1.y*v2.y;
+      const m1 = Math.hypot(v1.x, v1.y), m2 = Math.hypot(v2.x, v2.y);
+      const cos = Math.max(-1, Math.min(1, dot/(m1*m2)));
+      return Math.acos(cos) * 180 / Math.PI;
+    }
+    function polarAngle(p, v){ return Math.atan2(p.y - v.y, p.x - v.x); }
+    function normalizeAngle(a){
+      while(a < 0) a += Math.PI*2;
+      while(a >= Math.PI*2) a -= Math.PI*2;
+      return a;
+    }
+    function angleDiffCCW(a1, a2){ return normalizeAngle(a2 - a1); }
+    function arcPath(center, radius, startAngle, endAngle, preferSmall=true){
+      let delta = angleDiffCCW(startAngle, endAngle);
+      if(preferSmall && delta > Math.PI){
+        const t = startAngle; startAngle = endAngle; endAngle = t;
+        delta = angleDiffCCW(startAngle, endAngle);
+      }
+      const start = {x:center.x + radius*Math.cos(startAngle), y:center.y + radius*Math.sin(startAngle)};
+      const end   = {x:center.x + radius*Math.cos(endAngle),   y:center.y + radius*Math.sin(endAngle)};
+      const largeArc = delta > Math.PI ? 1 : 0;
+      return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+    }
+    function angleArcAtVertex(vertex, p1, p2, radius){
+      return arcPath(vertex, radius, polarAngle(p1, vertex), polarAngle(p2, vertex), true);
+    }
+    function labelPositionForAngle(vertex, p1, p2, distance){
+      const a1 = polarAngle(p1, vertex), a2 = polarAngle(p2, vertex);
+      let diff = normalizeAngle(a2 - a1), mid;
+      if(diff <= Math.PI) mid = a1 + diff/2;
+      else { diff = normalizeAngle(a1 - a2); mid = a2 + diff/2; }
+      return { x: vertex.x + distance*Math.cos(mid), y: vertex.y + distance*Math.sin(mid) };
+    }
+    function offsetLabel(p, center, size=30){
+      const vx = p.x - center.x, vy = p.y - center.y, len = Math.hypot(vx, vy) || 1;
+      return { dx: (vx/len)*size - 10, dy: (vy/len)*size + 8 };
+    }
+    function svgPointFromEvent(svg, evt){
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+    function angleFromSvgPoint(p, c){ return Math.atan2(p.y - c.y, p.x - c.x); }
+    function unwrapNear(raw, current){
+      return raw + Math.round((current - raw)/(Math.PI*2)) * Math.PI*2;
+    }
+
+    // ---------- TABS ----------
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-page").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    // ---------- B3 ----------
+    (function(){
+      const svg = document.getElementById("b3-svg");
+      const C = {x:395, y:325}, R = 225;
+      let theta = Math.PI * 1.02, phiX = -Math.PI/2.15, phiT = Math.PI/2.05, active = null;
+      let labelsVisible = true, hintsVisible = true, show90 = true, showStatementX = true, showStatementT = true, showBothPoints = true;
+
+      const el = {
+        diameterLine:document.getElementById("b3-diameterLine"),
+        radiusOA:document.getElementById("b3-radiusOA"),
+        radiusOB:document.getElementById("b3-radiusOB"),
+        lineAX:document.getElementById("b3-lineAX"),
+        lineXB:document.getElementById("b3-lineXB"),
+        lineAT:document.getElementById("b3-lineAT"),
+        lineTB:document.getElementById("b3-lineTB"),
+        lowerGroup:document.getElementById("b3-lowerGroup"),
+        arcAOB:document.getElementById("b3-arcAOB"),
+        arcAXB:document.getElementById("b3-arcAXB"),
+        arcATB:document.getElementById("b3-arcATB"),
+        pointO:document.getElementById("b3-pointO"),
+        pointA:document.getElementById("b3-pointA"),
+        pointB:document.getElementById("b3-pointB"),
+        pointX:document.getElementById("b3-pointX"),
+        pointT:document.getElementById("b3-pointT"),
+        labels:document.getElementById("b3-labels"),
+        hints:document.getElementById("b3-hints"),
+        labelA:document.getElementById("b3-labelA"),
+        labelB:document.getElementById("b3-labelB"),
+        labelX:document.getElementById("b3-labelX"),
+        labelT:document.getElementById("b3-labelT"),
+        labelO:document.getElementById("b3-labelO"),
+        hintA:document.getElementById("b3-hintA"),
+        hintB:document.getElementById("b3-hintB"),
+        hintX:document.getElementById("b3-hintX"),
+        hintT:document.getElementById("b3-hintT"),
+        angleTextX:document.getElementById("b3-angleTextX"),
+        angleTextT:document.getElementById("b3-angleTextT"),
+        statementX:document.getElementById("b3-statementX"),
+        statementT:document.getElementById("b3-statementT"),
+        angleAOB:document.getElementById("b3-angleAOB"),
+        angleAXB:document.getElementById("b3-angleAXB"),
+        angleATB:document.getElementById("b3-angleATB"),
+        angleSum:document.getElementById("b3-angleSum"),
+        randomiseBtn:document.getElementById("b3-randomiseBtn"),
+        resetBtn:document.getElementById("b3-resetBtn"),
+        toggleLabelsBtn:document.getElementById("b3-toggleLabelsBtn"),
+        toggleHintsBtn:document.getElementById("b3-toggleHintsBtn"),
+        show90Checkbox:document.getElementById("b3-show90Checkbox"),
+        showAXBCheckbox:document.getElementById("b3-showAXBCheckbox"),
+        showATBCheckbox:document.getElementById("b3-showATBCheckbox"),
+        showBothPointsCheckbox:document.getElementById("b3-showBothPointsCheckbox")
+      };
+
+      function almostEndpoint(angle){
+        const dA = Math.abs(Math.atan2(Math.sin(angle-theta), Math.cos(angle-theta)));
+        const dB = Math.abs(Math.atan2(Math.sin(angle-(theta+Math.PI)), Math.cos(angle-(theta+Math.PI))));
+        return Math.min(dA, dB) < 0.16;
+      }
+      function safeAngle(angle, shift){ return almostEndpoint(angle) ? angle + shift : angle; }
+
+      function update(){
+        phiX = safeAngle(phiX, 0.28);
+        phiT = safeAngle(phiT, -0.28);
+        const A = pointOnCircle(C,R,theta), B = pointOnCircle(C,R,theta+Math.PI), X = pointOnCircle(C,R,phiX), T = pointOnCircle(C,R,phiT);
+
+        setLine(el.diameterLine, A, B); setLine(el.radiusOA,C,A); setLine(el.radiusOB,C,B);
+        setLine(el.lineAX,A,X); setLine(el.lineXB,X,B); setLine(el.lineAT,A,T); setLine(el.lineTB,T,B);
+        setCircle(el.pointO,C); setCircle(el.pointA,A); setCircle(el.pointB,B); setCircle(el.pointX,X); setCircle(el.pointT,T);
+
+        el.arcAOB.setAttribute("d", arcPath(C,45,theta,theta+Math.PI,false));
+        el.arcAXB.setAttribute("d", angleArcAtVertex(X,A,B,42));
+        el.arcATB.setAttribute("d", angleArcAtVertex(T,A,B,42));
+
+        const aob = angleBetween(A,C,B), axb = angleBetween(A,X,B), atb = angleBetween(A,T,B);
+        el.angleAOB.textContent = `${aob.toFixed(1)}°`;
+        el.angleAXB.textContent = `${axb.toFixed(1)}°`;
+        el.angleATB.textContent = `${atb.toFixed(1)}°`;
+        el.angleSum.textContent = `${(axb+atb).toFixed(1)}°`;
+
+        const oA = offsetLabel(A,C), oB = offsetLabel(B,C), oX = offsetLabel(X,C), oT = offsetLabel(T,C);
+        setText(el.labelA,A,oA.dx,oA.dy); setText(el.labelB,B,oB.dx,oB.dy); setText(el.labelX,X,oX.dx,oX.dy); setText(el.labelT,T,oT.dx,oT.dy); setText(el.labelO,C,12,-10);
+        setText(el.hintA,A,oA.dx-4,oA.dy+18); setText(el.hintB,B,oB.dx-4,oB.dy+18); setText(el.hintX,X,oX.dx-4,oX.dy+18); setText(el.hintT,T,oT.dx-4,oT.dy+18);
+
+        setText(el.angleTextX, labelPositionForAngle(X,A,B,63));
+        setText(el.angleTextT, labelPositionForAngle(T,A,B,63));
+        setText(el.statementX, {x:(X.x+C.x)/2, y:(X.y+C.y)/2-12});
+        setText(el.statementT, {x:(T.x+C.x)/2, y:(T.y+C.y)/2+12});
+
+        el.lowerGroup.style.display = showBothPoints ? "" : "none";
+        el.pointT.style.display = showBothPoints ? "" : "none";
+        el.arcATB.style.display = showBothPoints ? "" : "none";
+        el.angleTextX.style.display = show90 ? "" : "none";
+        el.angleTextT.style.display = show90 && showBothPoints ? "" : "none";
+        el.statementX.style.display = showStatementX ? "" : "none";
+        el.statementT.style.display = showStatementT && showBothPoints ? "" : "none";
+        el.labels.style.display = labelsVisible ? "" : "none";
+        el.hints.style.display = hintsVisible ? "" : "none";
+        el.labelT.style.display = showBothPoints && labelsVisible ? "" : "none";
+        el.hintT.style.display = showBothPoints && hintsVisible ? "" : "none";
+      }
+
+      function onPointerDown(evt){
+        const t = evt.target.closest("[data-b3]");
+        if(!t) return;
+        active = t.dataset.b3;
+        t.setPointerCapture(evt.pointerId);
+      }
+      function onPointerMove(evt){
+        if(!active) return;
+        const a = angleFromSvgPoint(svgPointFromEvent(svg,evt), C);
+        if(active==="A") theta = a;
+        if(active==="B") theta = a + Math.PI;
+        if(active==="X") phiX = a;
+        if(active==="T") phiT = a;
+        update();
+      }
+      function onPointerUp(){ active = null; }
+      function resetAll(){
+        theta = Math.PI*1.02; phiX = -Math.PI/2.15; phiT = Math.PI/2.05;
+        labelsVisible = true; hintsVisible = true; show90 = true; showStatementX = true; showStatementT = true; showBothPoints = true;
+        el.toggleLabelsBtn.textContent = "Hide labels"; el.toggleHintsBtn.textContent = "Hide drag hints";
+        el.show90Checkbox.checked = true; el.showAXBCheckbox.checked = true; el.showATBCheckbox.checked = true; el.showBothPointsCheckbox.checked = true;
+        update();
+      }
+      function randomise(){
+        theta = Math.random()*Math.PI*2;
+        phiX = theta + (0.22 + Math.random()*0.76) * Math.PI;
+        phiT = theta - (0.22 + Math.random()*0.76) * Math.PI;
+        update();
+      }
+
+      el.resetBtn.addEventListener("click", resetAll);
+      el.randomiseBtn.addEventListener("click", randomise);
+      el.toggleLabelsBtn.addEventListener("click", ()=>{ labelsVisible=!labelsVisible; el.toggleLabelsBtn.textContent = labelsVisible ? "Hide labels" : "Show labels"; update(); });
+      el.toggleHintsBtn.addEventListener("click", ()=>{ hintsVisible=!hintsVisible; el.toggleHintsBtn.textContent = hintsVisible ? "Hide drag hints" : "Show drag hints"; update(); });
+      el.show90Checkbox.addEventListener("change", ()=>{ show90 = el.show90Checkbox.checked; update(); });
+      el.showAXBCheckbox.addEventListener("change", ()=>{ showStatementX = el.showAXBCheckbox.checked; update(); });
+      el.showATBCheckbox.addEventListener("change", ()=>{ showStatementT = el.showATBCheckbox.checked; update(); });
+      el.showBothPointsCheckbox.addEventListener("change", ()=>{ showBothPoints = el.showBothPointsCheckbox.checked; update(); });
+
+      svg.addEventListener("pointerdown", onPointerDown);
+      svg.addEventListener("pointermove", onPointerMove);
+      svg.addEventListener("pointerup", onPointerUp);
+      svg.addEventListener("pointercancel", onPointerUp);
+      svg.addEventListener("pointerleave", onPointerUp);
+
+      resetAll();
+    })();
+
+    // ---------- B4 ----------
+    (function(){
+      const svg = document.getElementById("b4-svg");
+      const C = {x:395, y:325}, R = 225, GAP = 0.18;
+      let active = null, labelsVisible = true, valuesVisible = true;
+
+      // Unwrapped angles preserving cyclic order A < X < B < Y < A+2π
+      let tA, tX, tB, tY;
+
+      const el = {
+        quad:document.getElementById("b4-quad"),
+        arcX:document.getElementById("b4-arcX"),
+        arcY:document.getElementById("b4-arcY"),
+        arcA:document.getElementById("b4-arcA"),
+        arcB:document.getElementById("b4-arcB"),
+        lineXA:document.getElementById("b4-lineXA"),
+        lineXB:document.getElementById("b4-lineXB"),
+        lineYA:document.getElementById("b4-lineYA"),
+        lineYB:document.getElementById("b4-lineYB"),
+        pointX:document.getElementById("b4-pointX"),
+        pointA:document.getElementById("b4-pointA"),
+        pointY:document.getElementById("b4-pointY"),
+        pointB:document.getElementById("b4-pointB"),
+        labelX:document.getElementById("b4-labelX"),
+        labelA:document.getElementById("b4-labelA"),
+        labelY:document.getElementById("b4-labelY"),
+        labelB:document.getElementById("b4-labelB"),
+        labels:document.getElementById("b4-labels"),
+        valX:document.getElementById("b4-valX"),
+        valY:document.getElementById("b4-valY"),
+        valA:document.getElementById("b4-valA"),
+        valB:document.getElementById("b4-valB"),
+        angleAXB:document.getElementById("b4-angleAXB"),
+        angleAYB:document.getElementById("b4-angleAYB"),
+        sumXY:document.getElementById("b4-sumXY"),
+        angleXAY:document.getElementById("b4-angleXAY"),
+        angleXBY:document.getElementById("b4-angleXBY"),
+        sumAB:document.getElementById("b4-sumAB"),
+        randomiseBtn:document.getElementById("b4-randomiseBtn"),
+        resetBtn:document.getElementById("b4-resetBtn"),
+        toggleLabelsBtn:document.getElementById("b4-toggleLabelsBtn"),
+        toggleValuesBtn:document.getElementById("b4-toggleValuesBtn")
+      };
+
+      function mod2(a){ return normalizeAngle(a); }
+
+      function pointMap(){
+        return {
+          A: pointOnCircle(C,R,mod2(tA)),
+          X: pointOnCircle(C,R,mod2(tX)),
+          B: pointOnCircle(C,R,mod2(tB)),
+          Y: pointOnCircle(C,R,mod2(tY))
+        };
+      }
+
+      function setInitial(){
+        // A left, X top, B right-lower, Y bottom
+        tA = 3.05;
+        tX = 4.75;
+        tB = 6.55;
+        tY = 8.00;
+      }
+
+      function randomise(){
+        // Build a valid cyclic order
+        tA = 2.6 + Math.random()*0.5;                          // around left side
+        tX = tA + 1.0 + Math.random()*0.8;                     // above
+        tB = tX + 1.0 + Math.random()*0.8;                     // right
+        tY = tB + 0.7 + Math.random()*0.8;                     // below
+        if(tY >= tA + 2*Math.PI - GAP) tY = tA + 2*Math.PI - GAP;
+        update();
+      }
+
+      function clampDragged(label, raw){
+        const current = label === "A" ? tA : label === "X" ? tX : label === "B" ? tB : tY;
+        let candidate = unwrapNear(normalizeAngle(raw), current);
+
+        if(label === "A"){
+          // between Y-2π and X
+          candidate = clamp(candidate, tY - 2*Math.PI + GAP, tX - GAP);
+          tA = candidate;
+        } else if(label === "X"){
+          candidate = clamp(candidate, tA + GAP, tB - GAP);
+          tX = candidate;
+        } else if(label === "B"){
+          candidate = clamp(candidate, tX + GAP, tY - GAP);
+          tB = candidate;
+        } else if(label === "Y"){
+          candidate = clamp(candidate, tB + GAP, tA + 2*Math.PI - GAP);
+          tY = candidate;
+        }
+      }
+
+      function update(){
+        const P = pointMap();
+        const {A,X,B,Y} = P;
+
+        setCircle(el.pointA,A); setCircle(el.pointX,X); setCircle(el.pointB,B); setCircle(el.pointY,Y);
+        setLine(el.lineXA,X,A); setLine(el.lineXB,X,B); setLine(el.lineYA,Y,A); setLine(el.lineYB,Y,B);
+
+        el.quad.setAttribute("d", `M ${A.x} ${A.y} L ${X.x} ${X.y} L ${B.x} ${B.y} L ${Y.x} ${Y.y} Z`);
+        el.arcX.setAttribute("d", angleArcAtVertex(X,A,B,40));
+        el.arcY.setAttribute("d", angleArcAtVertex(Y,A,B,40));
+        el.arcA.setAttribute("d", angleArcAtVertex(A,X,Y,40));
+        el.arcB.setAttribute("d", angleArcAtVertex(B,X,Y,40));
+
+        const angAXB = angleBetween(A,X,B);
+        const angAYB = angleBetween(A,Y,B);
+        const angXAY = angleBetween(X,A,Y);
+        const angXBY = angleBetween(X,B,Y);
+
+        el.angleAXB.textContent = `${angAXB.toFixed(1)}°`;
+        el.angleAYB.textContent = `${angAYB.toFixed(1)}°`;
+        el.sumXY.textContent = `${(angAXB + angAYB).toFixed(1)}°`;
+        el.angleXAY.textContent = `${angXAY.toFixed(1)}°`;
+        el.angleXBY.textContent = `${angXBY.toFixed(1)}°`;
+        el.sumAB.textContent = `${(angXAY + angXBY).toFixed(1)}°`;
+
+        const oA = offsetLabel(A,C), oX = offsetLabel(X,C), oB = offsetLabel(B,C), oY = offsetLabel(Y,C);
+        setText(el.labelA,A,oA.dx,oA.dy); setText(el.labelX,X,oX.dx,oX.dy);
+        setText(el.labelB,B,oB.dx,oB.dy); setText(el.labelY,Y,oY.dx,oY.dy);
+
+        setText(el.valX, labelPositionForAngle(X,A,B,60));
+        setText(el.valY, labelPositionForAngle(Y,A,B,60));
+        setText(el.valA, labelPositionForAngle(A,X,Y,60));
+        setText(el.valB, labelPositionForAngle(B,X,Y,60));
+
+        el.valX.textContent = `${angAXB.toFixed(1)}°`;
+        el.valY.textContent = `${angAYB.toFixed(1)}°`;
+        el.valA.textContent = `${angXAY.toFixed(1)}°`;
+        el.valB.textContent = `${angXBY.toFixed(1)}°`;
+
+        el.labels.style.display = labelsVisible ? "" : "none";
+        const valDisp = valuesVisible ? "" : "none";
+        el.valX.style.display = valDisp; el.valY.style.display = valDisp; el.valA.style.display = valDisp; el.valB.style.display = valDisp;
+      }
+
+      function onPointerDown(evt){
+        const t = evt.target.closest("[data-b4]");
+        if(!t) return;
+        active = t.dataset.b4;
+        t.setPointerCapture(evt.pointerId);
+      }
+      function onPointerMove(evt){
+        if(!active) return;
+        const raw = angleFromSvgPoint(svgPointFromEvent(svg,evt), C);
+        clampDragged(active, raw);
+        update();
+      }
+      function onPointerUp(){ active = null; }
+
+      el.resetBtn.addEventListener("click", () => { setInitial(); labelsVisible=true; valuesVisible=true; el.toggleLabelsBtn.textContent="Hide labels"; el.toggleValuesBtn.textContent="Hide angle values"; update(); });
+      el.randomiseBtn.addEventListener("click", randomise);
+      el.toggleLabelsBtn.addEventListener("click", ()=>{ labelsVisible=!labelsVisible; el.toggleLabelsBtn.textContent = labelsVisible ? "Hide labels" : "Show labels"; update(); });
+      el.toggleValuesBtn.addEventListener("click", ()=>{ valuesVisible=!valuesVisible; el.toggleValuesBtn.textContent = valuesVisible ? "Hide angle values" : "Show angle values"; update(); });
+
+      svg.addEventListener("pointerdown", onPointerDown);
+      svg.addEventListener("pointermove", onPointerMove);
+      svg.addEventListener("pointerup", onPointerUp);
+      svg.addEventListener("pointercancel", onPointerUp);
+      svg.addEventListener("pointerleave", onPointerUp);
+
+      setInitial();
+      update();
+    })();
+  </script>
+</body>
+</html>
