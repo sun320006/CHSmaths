@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle Properties Discovery Interactives — B3 and B4</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5f6b7a;
+      --line: #d8deea;
+      --blue: #2563eb;
+      --orange: #f97316;
+      --green: #16a34a;
+      --purple: #7c3aed;
+      --red: #dc2626;
+      --gold: #b7791f;
+      --soft-blue: #eef4ff;
+      --soft-gold: #fff7e6;
+      --soft-green: #ecfdf3;
+      --shadow: 0 14px 35px rgba(23, 32, 51, 0.10);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 28rem),
+        radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.10), transparent 28rem),
+        var(--bg);
+    }
+
+    header {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 34px 22px 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.7rem, 3vw, 2.45rem);
+      letter-spacing: -0.035em;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.55;
+      max-width: 840px;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 22px 50px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 4px 0 18px;
+    }
+
+    .tab-button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-weight: 750;
+      cursor: pointer;
+      box-shadow: 0 5px 14px rgba(23, 32, 51, 0.06);
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .tab-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(37, 99, 235, 0.45);
+    }
+
+    .tab-button.active {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+    }
+
+    .applet {
+      display: none;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(216, 222, 234, 0.88);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .applet.active { display: block; }
+
+    .applet-header {
+      padding: 24px 24px 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(238, 244, 255, 0.95), rgba(255, 255, 255, 0.8));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue);
+      font-weight: 850;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+      letter-spacing: -0.025em;
+    }
+
+    .applet-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.82fr);
+      gap: 0;
+      min-height: 600px;
+    }
+
+    .canvas-wrap {
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border-right: 1px solid var(--line);
+      padding: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg {
+      width: 100%;
+      max-width: 680px;
+      height: auto;
+      min-height: 450px;
+      touch-action: none;
+      user-select: none;
+      background: white;
+      border: 1px solid #e5eaf3;
+      border-radius: 22px;
+      box-shadow: 0 10px 25px rgba(23, 32, 51, 0.08);
+    }
+
+    .panel {
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: white;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 20px rgba(23, 32, 51, 0.04);
+    }
+
+    .step h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .question {
+      background: var(--soft-blue);
+      border-color: rgba(37, 99, 235, 0.18);
+    }
+
+    .statement {
+      background: var(--soft-gold);
+      border-color: rgba(183, 121, 31, 0.24);
+      font-weight: 750;
+      line-height: 1.45;
+    }
+
+    .property {
+      background: var(--soft-green);
+      border-color: rgba(22, 163, 74, 0.24);
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    label.control {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid #edf0f6;
+      cursor: pointer;
+      font-weight: 700;
+      line-height: 1.3;
+      background: #fbfcff;
+    }
+
+    label.control:hover {
+      border-color: rgba(37, 99, 235, 0.32);
+      background: #f7faff;
+    }
+
+    label.control.disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+      margin-top: 1px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button.action {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      font-weight: 850;
+      color: white;
+      background: var(--ink);
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(23, 32, 51, 0.14);
+    }
+
+    button.action.secondary { background: #64748b; }
+
+    button.action:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+
+    .result {
+      display: none;
+      margin-top: 10px;
+      border-radius: 15px;
+      padding: 12px 14px;
+      background: #fff7ed;
+      border: 1px solid rgba(249, 115, 22, 0.23);
+      color: #9a3412;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .result.show { display: block; }
+
+    .small-note {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    .circle-line {
+      fill: none;
+      stroke: #1e293b;
+      stroke-width: 2.4;
+    }
+
+    .diameter-line {
+      stroke: #334155;
+      stroke-width: 2.5;
+      stroke-dasharray: 7 6;
+    }
+
+    .chord-line {
+      stroke: #94a3b8;
+      stroke-width: 2;
+    }
+
+    .quad-line {
+      fill: rgba(37, 99, 235, 0.05);
+      stroke: #64748b;
+      stroke-width: 2.2;
+    }
+
+    .angle-arc {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+    }
+
+    .point {
+      stroke: white;
+      stroke-width: 3;
+      cursor: grab;
+      filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.22));
+    }
+
+    .point:active { cursor: grabbing; }
+
+    .fixed-point {
+      stroke: white;
+      stroke-width: 3;
+      filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.22));
+    }
+
+    .label {
+      font-size: 20px;
+      font-weight: 900;
+      fill: #0f172a;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+    }
+
+    .angle-label {
+      font-size: 18px;
+      font-weight: 900;
+      fill: #0f172a;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+    }
+
+    .caption {
+      font-size: 15px;
+      fill: #475569;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; }
+      .canvas-wrap {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      svg { min-height: 360px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Circle Properties Discovery Interactives</h1>
+    <p>
+      A discovery sequence for Property B3 and Property B4. Students reveal one idea at a time, discuss with a partner, and then connect the observations to the formal property.
+    </p>
+  </header>
+
+  <main>
+    <nav class="tabs" aria-label="Applet tabs">
+      <button class="tab-button active" data-tab="b3">Applet 1: B3 Semicircle</button>
+      <button class="tab-button" data-tab="b4">Applet 2: B4 Opposite Segments</button>
+    </nav>
+
+    <section id="b3" class="applet active">
+      <div class="applet-header">
+        <div class="eyebrow">Applet 1</div>
+        <h2>Discover Property B3: Angle in a Semicircle</h2>
+        <p>Start with the diameter AB. Reveal ∠AOB first, then ∠AXB. Use the questions to guide discussion before showing point T.</p>
+      </div>
+
+      <div class="workspace">
+        <div class="canvas-wrap">
+          <svg id="svgB3" viewBox="0 0 640 520" role="img" aria-label="Interactive circle diagram for angle in a semicircle"></svg>
+        </div>
+
+        <aside class="panel">
+          <div class="step">
+            <h3>Step 1: Reveal the first two angles</h3>
+            <div class="controls">
+              <label class="control"><input id="b3ShowAOB" type="checkbox" /> <span>Show angle AOB</span></label>
+              <label class="control"><input id="b3ShowAXB" type="checkbox" /> <span>Show angle AXB</span></label>
+            </div>
+          </div>
+
+          <div class="step question">
+            <h3>Question 1</h3>
+            <p>Is the circle property “angle at centre is twice the angle at circumference” observed here? Discuss with your partner.</p>
+          </div>
+
+          <div class="step statement">
+            An angle in a semicircle is always a right angle. (rt. ∠ in semicircle)
+          </div>
+
+          <div class="step question">
+            <h3>Question 2</h3>
+            <p>Does the 90° angle work on the opposite side of the semicircle too? Discuss with your partner.</p>
+          </div>
+
+          <div class="step">
+            <h3>Step 2: Test the opposite side</h3>
+            <div class="controls">
+              <label class="control"><input id="b3ShowBoth" type="checkbox" /> <span>Show both X and T</span></label>
+              <label id="b3AtbLabel" class="control disabled"><input id="b3ShowATB" type="checkbox" disabled /> <span>Show angle ATB</span></label>
+            </div>
+          </div>
+
+          <div class="step statement">
+            Take note that 90° works on opposite sides of a semicircle. We will now link this to Property B4. Go on to the second applet to explore Property B4.
+          </div>
+
+          <div class="step">
+            <h3>Last step</h3>
+            <div class="button-row">
+              <button id="b3Random" class="action">Randomise</button>
+              <button id="b3Reset" class="action secondary">Reset</button>
+            </div>
+            <div class="small-note">Drag A or B to rotate the diameter. Drag X to test the angle in different positions. T appears on the opposite side of the semicircle.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="b4" class="applet">
+      <div class="applet-header">
+        <div class="eyebrow">Applet 2</div>
+        <h2>Discover Property B4: Angles in Opposite Segments</h2>
+        <p>Move the vertices of the cyclic quadrilateral and observe how each opposite angle pair changes while its sum remains 180°.</p>
+      </div>
+
+      <div class="workspace">
+        <div class="canvas-wrap">
+          <svg id="svgB4" viewBox="0 0 640 520" role="img" aria-label="Interactive circle diagram for angles in opposite segments"></svg>
+        </div>
+
+        <aside class="panel">
+          <div class="step question">
+            <h3>Question 1</h3>
+            <p>Drag X or Y. What do you notice about ∠XAY and ∠XBY? Discuss with your partner.</p>
+          </div>
+
+          <div class="step">
+            <h3>Step 1: Reveal the opposite pair affected by X and Y</h3>
+            <div class="controls">
+              <label class="control"><input id="b4ShowPair1" type="checkbox" /> <span>Show angle XAY and XBY</span></label>
+              <label class="control"><input id="b4ShowSum1" type="checkbox" /> <span>Show sum of ∠XAY + ∠XBY</span></label>
+            </div>
+            <div id="b4Sum1" class="result"></div>
+            <div class="small-note">This pair changes when X or Y is dragged because X and Y form the chord used by the two opposite angles.</div>
+          </div>
+
+          <div class="step question">
+            <h3>Question 2</h3>
+            <p>Drag A or B. What do you notice about ∠AXB and ∠AYB? Discuss with your partner.</p>
+          </div>
+
+          <div class="step">
+            <h3>Step 2: Reveal the opposite pair affected by A and B</h3>
+            <div class="controls">
+              <label class="control"><input id="b4ShowPair2" type="checkbox" /> <span>Show angle AXB and AYB</span></label>
+              <label class="control"><input id="b4ShowSum2" type="checkbox" /> <span>Show sum of ∠AXB + ∠AYB</span></label>
+            </div>
+            <div id="b4Sum2" class="result"></div>
+            <div class="small-note">This pair changes when A or B is dragged because A and B form the chord used by the two opposite angles.</div>
+          </div>
+
+          <div class="step property">
+            Property B4: Angles in opposite segments are supplementary. (∠s in opp. segments)
+          </div>
+
+          <div class="step">
+            <h3>Last step</h3>
+            <div class="button-row">
+              <button id="b4Random" class="action">Randomise</button>
+              <button id="b4Reset" class="action secondary">Reset</button>
+            </div>
+            <div class="small-note">All four points are draggable, similar to a GeoGebra exploration. The applet keeps the cyclic order A-X-B-Y so the quadrilateral stays cyclic and convex.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TAU = Math.PI * 2;
+    const ns = "http://www.w3.org/2000/svg";
+
+    const b3 = {
+      svg: document.getElementById("svgB3"),
+      cx: 320,
+      cy: 260,
+      r: 170,
+      aAngle: Math.PI,
+      xAngle: Math.PI / 5
+    };
+
+    const b4 = {
+      svg: document.getElementById("svgB4"),
+      cx: 320,
+      cy: 260,
+      r: 165,
+      // General non-diameter starting position: this avoids reducing B4
+      // to the special semicircle case where both angles are 90°.
+      angles: {
+        A: 210 * Math.PI / 180,
+        X: 280 * Math.PI / 180,
+        B: 20 * Math.PI / 180,
+        Y: 140 * Math.PI / 180
+      },
+      order: ["A", "X", "B", "Y"]
+    };
+
+    const colours = {
+      A: "#2563eb",
+      B: "#dc2626",
+      O: "#0f172a",
+      X: "#16a34a",
+      T: "#7c3aed",
+      Y: "#f97316"
+    };
+
+    const b3Ids = ["b3ShowAOB", "b3ShowAXB", "b3ShowBoth", "b3ShowATB"];
+    const b4Ids = ["b4ShowPair1", "b4ShowSum1", "b4ShowPair2", "b4ShowSum2"];
+
+    let dragging = null;
+
+    function el(tag, attrs = {}, text = "") {
+      const node = document.createElementNS(ns, tag);
+      for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function html(id) { return document.getElementById(id); }
+    function checked(id) { return html(id).checked; }
+
+    function normAngle(a) {
+      a = a % TAU;
+      return a < 0 ? a + TAU : a;
+    }
+
+    function positiveDelta(to, from) {
+      let d = (normAngle(to) - normAngle(from)) % TAU;
+      if (d < 0) d += TAU;
+      return d;
+    }
+
+    function pt(cx, cy, r, angle) {
+      return {
+        x: cx + r * Math.cos(angle),
+        y: cy + r * Math.sin(angle),
+        angle
+      };
+    }
+
+    function fmtDeg(value) {
+      const rounded1 = Math.round(value * 10) / 10;
+      if (Math.abs(rounded1 - Math.round(rounded1)) < 0.05) return String(Math.round(rounded1));
+      return rounded1.toFixed(1);
+    }
+
+    function roundOne(value) {
+      return Math.round(value * 10) / 10;
+    }
+
+    function b4DisplayValues(vals) {
+      // Display each opposite pair as exact supplements after rounding.
+      // This prevents the visual labels from looking disconnected to students.
+      const axb = roundOne(vals.axb);
+      const ayb = roundOne(180 - axb);
+      const xay = roundOne(vals.xay);
+      const xby = roundOne(180 - xay);
+      return { axb, ayb, xay, xby };
+    }
+
+    function angleAt(p1, vertex, p2) {
+      const v1x = p1.x - vertex.x;
+      const v1y = p1.y - vertex.y;
+      const v2x = p2.x - vertex.x;
+      const v2y = p2.y - vertex.y;
+      const dot = v1x * v2x + v1y * v2y;
+      const mag1 = Math.hypot(v1x, v1y);
+      const mag2 = Math.hypot(v2x, v2y);
+      const c = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
+      return Math.acos(c) * 180 / Math.PI;
+    }
+
+    function pointForB3(name) {
+      if (name === "O") return { x: b3.cx, y: b3.cy };
+      if (name === "A") return pt(b3.cx, b3.cy, b3.r, b3.aAngle);
+      if (name === "B") return pt(b3.cx, b3.cy, b3.r, b3.aAngle + Math.PI);
+      if (name === "X") return pt(b3.cx, b3.cy, b3.r, b3.xAngle);
+      if (name === "T") return pt(b3.cx, b3.cy, b3.r, 2 * b3.aAngle - b3.xAngle);
+    }
+
+    function pointForB4(name) {
+      return pt(b4.cx, b4.cy, b4.r, b4.angles[name]);
+    }
+
+    function addText(svg, x, y, text, cls = "label", anchor = "middle") {
+      const t = el("text", { x, y, class: cls, "text-anchor": anchor, "dominant-baseline": "middle" }, text);
+      svg.appendChild(t);
+      return t;
+    }
+
+    function addLine(svg, p1, p2, cls = "chord-line") {
+      svg.appendChild(el("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, class: cls }));
+    }
+
+    function addCircle(svg, cx, cy, r, cls = "circle-line") {
+      svg.appendChild(el("circle", { cx, cy, r, class: cls }));
+    }
+
+    function addPoint(svg, app, name, p, fill, draggable = true) {
+      const c = el("circle", {
+        cx: p.x,
+        cy: p.y,
+        r: name === "O" ? 7 : 10,
+        fill,
+        class: draggable && name !== "O" ? "point" : "fixed-point",
+        "data-app": draggable ? app : "",
+        "data-point": draggable ? name : ""
+      });
+      svg.appendChild(c);
+
+      const centre = app === "b3" ? b3 : b4;
+      const dx = p.x - centre.cx;
+      const dy = p.y - centre.cy;
+      const mag = Math.max(1, Math.hypot(dx, dy));
+      const offset = name === "O" ? 20 : 25;
+      addText(svg, p.x + dx / mag * offset, p.y + dy / mag * offset, name, "label");
+    }
+
+    function anglePath(vertex, p1, p2, radius) {
+      const a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+      const a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+      let d = a2 - a1;
+      while (d <= -Math.PI) d += TAU;
+      while (d > Math.PI) d -= TAU;
+      const sweep = d >= 0 ? 1 : 0;
+      const largeArc = Math.abs(d) > Math.PI ? 1 : 0;
+      const start = { x: vertex.x + radius * Math.cos(a1), y: vertex.y + radius * Math.sin(a1) };
+      const end = { x: vertex.x + radius * Math.cos(a1 + d), y: vertex.y + radius * Math.sin(a1 + d) };
+      return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
+    }
+
+    function angleLabelPosition(vertex, p1, p2, radius) {
+      const a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+      const a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+      let d = a2 - a1;
+      while (d <= -Math.PI) d += TAU;
+      while (d > Math.PI) d -= TAU;
+      const mid = a1 + d / 2;
+      return {
+        x: vertex.x + radius * Math.cos(mid),
+        y: vertex.y + radius * Math.sin(mid)
+      };
+    }
+
+    function addAngle(svg, p1, vertex, p2, colour, label, radius = 34, labelRadius = 62) {
+      svg.appendChild(el("path", {
+        d: anglePath(vertex, p1, p2, radius),
+        class: "angle-arc",
+        stroke: colour
+      }));
+      const pos = angleLabelPosition(vertex, p1, p2, labelRadius);
+      addText(svg, pos.x, pos.y, label, "angle-label");
+    }
+
+    function addFlippingStraightAngle(svg, A, O, B, X, colour) {
+      const radius = 45;
+      const ux = (A.x - O.x) / Math.hypot(A.x - O.x, A.y - O.y);
+      const uy = (A.y - O.y) / Math.hypot(A.x - O.x, A.y - O.y);
+
+      let px = -uy;
+      let py = ux;
+
+      const side = (X.x - O.x) * px + (X.y - O.y) * py;
+      if (side < 0) {
+        px = -px;
+        py = -py;
+      }
+
+      const start = { x: O.x + radius * ux, y: O.y + radius * uy };
+      const end = { x: O.x - radius * ux, y: O.y - radius * uy };
+      const k = 4 / 3;
+      const c1 = { x: start.x + k * radius * px, y: start.y + k * radius * py };
+      const c2 = { x: end.x + k * radius * px, y: end.y + k * radius * py };
+
+      svg.appendChild(el("path", {
+        d: `M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`,
+        class: "angle-arc",
+        stroke: colour
+      }));
+
+      addText(svg, O.x + px * 82, O.y + py * 82, "∠AOB = 180°", "angle-label");
+    }
+
+    function clear(svg) {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+    }
+
+    function renderB3() {
+      const svg = b3.svg;
+      clear(svg);
+
+      const A = pointForB3("A");
+      const B = pointForB3("B");
+      const O = pointForB3("O");
+      const X = pointForB3("X");
+      const T = pointForB3("T");
+      const showT = checked("b3ShowBoth");
+
+      addCircle(svg, b3.cx, b3.cy, b3.r);
+      addLine(svg, A, B, "diameter-line");
+      addLine(svg, A, X, "chord-line");
+      addLine(svg, B, X, "chord-line");
+
+      if (showT) {
+        addLine(svg, A, T, "chord-line");
+        addLine(svg, B, T, "chord-line");
+      }
+
+      if (checked("b3ShowAOB")) {
+        addFlippingStraightAngle(svg, A, O, B, X, colours.O);
+      }
+
+      if (checked("b3ShowAXB")) {
+        addAngle(svg, A, X, B, colours.X, `∠AXB = ${fmtDeg(angleAt(A, X, B))}°`, 32, 61);
+      }
+
+      if (showT && checked("b3ShowATB")) {
+        addAngle(svg, A, T, B, colours.T, `∠ATB = ${fmtDeg(angleAt(A, T, B))}°`, 32, 61);
+      }
+
+      addPoint(svg, "b3", "A", A, colours.A, true);
+      addPoint(svg, "b3", "B", B, colours.B, true);
+      addPoint(svg, "b3", "O", O, colours.O, false);
+      addPoint(svg, "b3", "X", X, colours.X, true);
+      if (showT) addPoint(svg, "b3", "T", T, colours.T, false);
+
+      addText(svg, 320, 492, "Drag X across the diameter: the displayed ∠AOB arc flips to the same side as X.", "caption");
+    }
+
+    function b4Points() {
+      return {
+        A: pointForB4("A"),
+        X: pointForB4("X"),
+        B: pointForB4("B"),
+        Y: pointForB4("Y")
+      };
+    }
+
+    function b4ArcGap(from, to) {
+      return positiveDelta(b4.angles[to], b4.angles[from]) * 180 / Math.PI;
+    }
+
+    function b4AngleValues() {
+      const p = b4Points();
+
+      // Compute the actual visible interior angles of the cyclic quadrilateral
+      // A-X-B-Y. Since the drag code preserves this cyclic order, each pair of
+      // opposite interior angles will sum to 180°.
+      const axb = angleAt(p.A, p.X, p.B);
+      const ayb = angleAt(p.A, p.Y, p.B);
+      const xay = angleAt(p.X, p.A, p.Y);
+      const xby = angleAt(p.X, p.B, p.Y);
+
+      return { axb, ayb, xay, xby };
+    }
+
+    function renderB4() {
+      const svg = b4.svg;
+      clear(svg);
+
+      const p = b4Points();
+      const vals = b4AngleValues();
+      const disp = b4DisplayValues(vals);
+
+      addCircle(svg, b4.cx, b4.cy, b4.r);
+
+      const polyPoints = `${p.A.x},${p.A.y} ${p.X.x},${p.X.y} ${p.B.x},${p.B.y} ${p.Y.x},${p.Y.y}`;
+      svg.appendChild(el("polygon", { points: polyPoints, class: "quad-line" }));
+
+      // No diagonals are drawn here. The four sides of the cyclic quadrilateral
+      // are enough for students to see the opposite interior angles clearly.
+
+      if (checked("b4ShowPair1")) {
+        addAngle(svg, p.A, p.X, p.B, colours.X, `∠AXB = ${fmtDeg(disp.axb)}°`, 30, 58);
+        addAngle(svg, p.A, p.Y, p.B, colours.Y, `∠AYB = ${fmtDeg(disp.ayb)}°`, 30, 58);
+        addText(svg, 320, 34, `Opposite pair: ∠AXB + ∠AYB = ${fmtDeg(disp.axb)}° + ${fmtDeg(disp.ayb)}° = 180°`, "caption");
+      }
+
+      if (checked("b4ShowPair2")) {
+        addAngle(svg, p.X, p.A, p.Y, colours.A, `∠XAY = ${fmtDeg(disp.xay)}°`, 30, 58);
+        addAngle(svg, p.X, p.B, p.Y, colours.B, `∠XBY = ${fmtDeg(disp.xby)}°`, 30, 58);
+        addText(svg, 320, checked("b4ShowPair1") ? 58 : 34, `Opposite pair: ∠XAY + ∠XBY = ${fmtDeg(disp.xay)}° + ${fmtDeg(disp.xby)}° = 180°`, "caption");
+      }
+
+      addPoint(svg, "b4", "A", p.A, colours.A, true);
+      addPoint(svg, "b4", "X", p.X, colours.X, true);
+      addPoint(svg, "b4", "B", p.B, colours.B, true);
+      addPoint(svg, "b4", "Y", p.Y, colours.Y, true);
+
+      const focusText = checked("b4ShowPair1") && !checked("b4ShowPair2")
+        ? "All points draggable. To change ∠AXB and ∠AYB, drag A or B because this pair stands on chord AB."
+        : checked("b4ShowPair2") && !checked("b4ShowPair1")
+          ? "All points draggable. To change ∠XAY and ∠XBY, drag X or Y because this pair stands on chord XY."
+          : "All four points are draggable. Opposite angle pairs stay supplementary in the cyclic quadrilateral.";
+      addText(svg, 320, 492, focusText, "caption");
+
+      html("b4Sum1").textContent = `∠AXB + ∠AYB = ${fmtDeg(disp.axb)}° + ${fmtDeg(disp.ayb)}° = 180°`;
+      html("b4Sum2").textContent = `∠XAY + ∠XBY = ${fmtDeg(disp.xay)}° + ${fmtDeg(disp.xby)}° = 180°`;
+      html("b4Sum1").classList.toggle("show", checked("b4ShowSum1"));
+      html("b4Sum2").classList.toggle("show", checked("b4ShowSum2"));
+    }
+
+    function handleB3Dependency() {
+      const showBoth = checked("b3ShowBoth");
+      const atb = html("b3ShowATB");
+      const label = html("b3AtbLabel");
+      atb.disabled = !showBoth;
+      label.classList.toggle("disabled", !showBoth);
+      if (!showBoth) atb.checked = false;
+    }
+
+    function resetB3() {
+      b3.aAngle = Math.PI;
+      b3.xAngle = Math.PI / 5;
+      b3Ids.forEach(id => html(id).checked = false);
+      handleB3Dependency();
+      renderB3();
+    }
+
+    function randomB3() {
+      const base = Math.random() * TAU;
+      b3.aAngle = base;
+      b3.xAngle = base + (Math.random() < 0.5 ? 1 : -1) * (0.45 + Math.random() * 2.35);
+      renderB3();
+    }
+
+    function resetB4() {
+      b4.angles = {
+        A: 210 * Math.PI / 180,
+        X: 280 * Math.PI / 180,
+        B: 20 * Math.PI / 180,
+        Y: 140 * Math.PI / 180
+      };
+      b4Ids.forEach(id => html(id).checked = false);
+      renderB4();
+    }
+
+    function randomB4() {
+      const start = Math.random() * TAU;
+      const gap1 = 0.58 + Math.random() * 1.05;
+      const gap2 = 0.58 + Math.random() * 1.05;
+      const gap3 = 0.58 + Math.random() * 1.05;
+
+      b4.angles.A = normAngle(start);
+      b4.angles.X = normAngle(start + gap1);
+      b4.angles.B = normAngle(start + gap1 + gap2);
+      b4.angles.Y = normAngle(start + gap1 + gap2 + gap3);
+      renderB4();
+    }
+
+    function angleFromPointer(evt, svg, cx, cy) {
+      const rect = svg.getBoundingClientRect();
+      const scaleX = 640 / rect.width;
+      const scaleY = 520 / rect.height;
+      const x = (evt.clientX - rect.left) * scaleX;
+      const y = (evt.clientY - rect.top) * scaleY;
+      return Math.atan2(y - cy, x - cx);
+    }
+
+    function boundedB4Angle(name, candidate) {
+      candidate = normAngle(candidate);
+      const idx = b4.order.indexOf(name);
+      const prevName = b4.order[(idx - 1 + b4.order.length) % b4.order.length];
+      const nextName = b4.order[(idx + 1) % b4.order.length];
+
+      const prev = b4.angles[prevName];
+      const next = b4.angles[nextName];
+      const width = positiveDelta(next, prev);
+      const minGap = 0.20;
+
+      let d = positiveDelta(candidate, prev);
+      if (d < minGap) d = minGap;
+      if (d > width - minGap) d = width - minGap;
+
+      return normAngle(prev + d);
+    }
+
+    function startDrag(evt) {
+      const point = evt.target.getAttribute("data-point");
+      const app = evt.target.getAttribute("data-app");
+      if (!point) return;
+      dragging = { app, point };
+      evt.target.setPointerCapture(evt.pointerId);
+    }
+
+    function moveDrag(evt) {
+      if (!dragging) return;
+
+      if (dragging.app === "b3") {
+        const angle = angleFromPointer(evt, b3.svg, b3.cx, b3.cy);
+        if (dragging.point === "A") b3.aAngle = angle;
+        if (dragging.point === "B") b3.aAngle = angle - Math.PI;
+        if (dragging.point === "X") b3.xAngle = angle;
+        renderB3();
+      }
+
+      if (dragging.app === "b4") {
+        const angle = angleFromPointer(evt, b4.svg, b4.cx, b4.cy);
+        b4.angles[dragging.point] = boundedB4Angle(dragging.point, angle);
+        renderB4();
+      }
+    }
+
+    function endDrag() {
+      dragging = null;
+    }
+
+    function wire() {
+      document.querySelectorAll(".tab-button").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+          document.querySelectorAll(".applet").forEach(a => a.classList.remove("active"));
+          button.classList.add("active");
+          html(button.dataset.tab).classList.add("active");
+          renderB3();
+          renderB4();
+        });
+      });
+
+      b3Ids.forEach(id => html(id).addEventListener("change", () => {
+        handleB3Dependency();
+        renderB3();
+      }));
+
+      b4Ids.forEach(id => html(id).addEventListener("change", renderB4));
+
+      html("b3Reset").addEventListener("click", resetB3);
+      html("b3Random").addEventListener("click", randomB3);
+      html("b4Reset").addEventListener("click", resetB4);
+      html("b4Random").addEventListener("click", randomB4);
+
+      [b3.svg, b4.svg].forEach(svg => {
+        svg.addEventListener("pointerdown", startDrag);
+        svg.addEventListener("pointermove", moveDrag);
+        svg.addEventListener("pointerup", endDrag);
+        svg.addEventListener("pointercancel", endDrag);
+        svg.addEventListener("pointerleave", endDrag);
+      });
+    }
+
+    wire();
+    handleB3Dependency();
+    renderB3();
+    renderB4();
+  </script>
+</body>
+</html>
